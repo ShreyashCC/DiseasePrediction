@@ -1,16 +1,28 @@
-# Ignore virtual environment
-venv/
+# Ignore Keras model files
+*.keras
 
-# Ignore Python cache
+# Ignore model checkpoints
+checkpoints/
+*.ckpt
+*.hdf5
+
+# Ignore dataset and large files
+data/
+*.csv
+*.tsv
+*.json
+*.npz
+*.npy
+
+# Ignore logs and cache
+logs/
+*.log
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
 
-# Ignore environment files
+# Ignore Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore virtual environment
+venv/
 .env
-
-# Ignore IDE and OS-specific files
-.vscode/
-.idea/
-.DS_Store
