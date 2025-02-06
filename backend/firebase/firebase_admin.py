@@ -1,13 +1,14 @@
 import firebase_admin
-from firebase_admin import credentials, firestore
+from firebase_admin import credentials, auth
 
-# Load Firebase credentials from the JSON file (update the path as needed)
-cred = credentials.Certificate("firebase/firebase_admin_config.json")
-
-# Initialize the Firebase Admin SDK
+# Initialize Firebase Admin with your service account key
+cred = credentials.Certificate('./firebase/AccountServiceKey.json')    # Path to your service account key
 firebase_admin.initialize_app(cred)
 
-# Initialize Firestore database client
-db = firestore.client()
-
-# You can now use `db` to interact with Firestore throughout your FastAPI app.
+# Helper function to verify Firebase ID token
+def verify_token(token: str):
+    try:
+        decoded_token = auth.verify_id_token(token)
+        return decoded_token
+    except Exception as e:
+        raise Exception("Invalid or expired token") from e
