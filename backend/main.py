@@ -1,54 +1,52 @@
-from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
+from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 import tensorflow as tf
 import numpy as np
 from PIL import Image
 import io
-from firebase.firebase_admin import verify_token  # Import from the correct path
 
 app = FastAPI()
 
-# Load Brain Tumor Model
-brain_tumor_model = tf.keras.models.load_model("models/brain_tumor_model.keras", compile=False)
+# Load the trained model
+loaded_model = tf.keras.models.load_model("models/brain_tumor_model.keras", compile=False)
 
-# Define Class Labels for Brain Tumor Prediction
-BRAIN_TUMOR_LABELS = ["Meningioma Tumor", "Glioma Tumor", "Pituitary Tumor", "No Tumor Detected"]
+# Define class labels
+train_class_names = ["glioma", "meningioma", "notumor", "pituitary"]
 
 @app.get("/")
 def home():
     return {"message": "AI Disease Prediction API"}
 
-# Secure the /predict route with Firebase token verification
 @app.post("/predict")
-async def predict_brain_tumor(file: UploadFile = File(...), token: str = Depends(verify_token)):
-    """Predict Brain Tumor (Adapted to Model's Built-in Preprocessing)"""
+async def predict_brain_tumor(file: UploadFile = File(...)):  
+    """Predict Brain Tumor Using the Same Method as Your Provided Code"""
     try:
-        # Read image and convert to RGB
+        # Read uploaded image
         image = await file.read()
-        image = Image.open(io.BytesIO(image)).convert("RGB")
+        
+        # Open image, resize, and convert to array (Same as your code)
+        img = Image.open(io.BytesIO(image)).convert("RGB")
+        img = img.resize((256, 256))  # Ensure correct input size
+        img_array = tf.keras.preprocessing.image.img_to_array(img)  # Convert to array
+        img_array = tf.expand_dims(img_array, axis=0)  # Add batch dimension
 
-        # Convert image to numpy array (DO NOT resize or normalize here)
-        image_array = np.array(image)
+        # Make Prediction
+        prediction = loaded_model.predict(img_array)
+        print("\n",prediction,"\n")
 
-        # Ensure image batch shape is correct (Add batch dimension)
-        img_batch = np.expand_dims(image_array, axis=0)  # Shape: (1, 256, 256, 3)
+        # Extract Predicted Class and Confidence
+        predicted_class_index = int(np.argmax(prediction))  # Convert to Python int
+        print("\n",predicted_class_index,"\n")
+        predicted_class = train_class_names[predicted_class_index]
+        confidence = float(round(100 * np.max(prediction), 2))  # Convert to Python float
 
-        # Model Prediction (Preprocessing is done inside the model itself)
-        predictions = brain_tumor_model.predict(img_batch)
-
-        index = int(np.argmax(predictions[0]))  # Convert to Python int
-        predicted_class = BRAIN_TUMOR_LABELS[index]
-        confidence = float(np.max(predictions[0]) * 100)  # Convert to Python float
-
-        return JSONResponse(content= {
-                                      "disease": "brain_tumor",
-                                      "result": predicted_class, 
-                                      "confidence": confidence
-                                      })
+        return JSONResponse(content={
+            "disease": "brain_tumor",
+            "result": predicted_class, 
+            "confidence": confidence
+        })
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
-
-
 
 if __name__ == "__main__":
     import uvicorn
