@@ -1,42 +1,40 @@
-import React, { useEffect } from "react";
-//import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import "./App.css";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { auth, db } from "./components/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 import Login from "./components/login";
 import SignUp from "./components/signUp";
-
+import Dashboard from "./components/dashboard";
+import ImageUpload from "./components/imageUpload";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Dashboard from "./components/dashboard";
-import { useState } from "react";
-import { auth } from "./components/firebase";
 
 function App() {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
+      setLoading(false);
     });
-  });
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+
   return (
     <Router>
       <div className="App">
         <div className="auth-wrapper">
           <div className="auth-inner">
             <Routes>
-              <Route
-                path="/"
-                element={user ? <Navigate to="/dashboard" /> : <Login />}
-              />
-              <Route path="/login" element={<Login />} />
+              <Route path="/" element={user ? <Navigate to="/dashboard" /> : <Login />} />
+              <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
               <Route path="/register" element={<SignUp />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
+              <Route path="/predict/:disease" element={user ? <ImageUpload /> : <Navigate to="/login" />} />
             </Routes>
             <ToastContainer />
           </div>

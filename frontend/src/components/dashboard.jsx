@@ -1,58 +1,138 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { toast } from "react-toastify";
 
 function Dashboard() {
   const [userDetails, setUserDetails] = useState(null);
-  const fetchUserData = async () => {
-    auth.onAuthStateChanged(async (user) => {
-      console.log(user);
+  const [loading, setLoading] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const navigate = useNavigate();
 
-      const docRef = doc(db, "Users", user.uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setUserDetails(docSnap.data());
-        console.log(docSnap.data());
-      } else {
-        console.log("User is not logged in");
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      try {
+        if (user) {
+          const docRef = doc(db, "Users", user.uid);
+          const docSnap = await getDoc(docRef);
+          
+        } else {
+          navigate("/login");
+        }
+      } catch (error) {
+        toast.error("Error fetching user data: " + error.message);
+      } finally {
+        setLoading(false);
       }
     });
-  };
-  useEffect(() => {
-    fetchUserData();
-  }, []);
+
+    return () => unsubscribe();
+  }, [navigate]);
 
   async function handleLogout() {
     try {
       await auth.signOut();
-      window.location.href = "/login";
-      console.log("User logged out successfully!");
+      toast.success("Logged out successfully!");
+      navigate("/login");
     } catch (error) {
-      console.error("Error logging out:", error.message);
+      toast.error("Error logging out: " + error.message);
     }
   }
+
+  const diseases = [
+    { name: "Brain Tumor", key: "brain_tumor", image: "/images/brain_tumor.jpg" },
+    { name: "Diabetic Retinopathy", key: "diabetic_retinopathy", image: "/images/diabetic_retinopathy.jpg" },
+    { name: "Skin Cancer", key: "skin_cancer", image: "/images/skin_cancer.jpg" },
+  ];
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
+    );
+  }
+
   return (
-    
-<div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700">
-    <a href="#">
-        <img class="rounded-t-lg" src="/docs/images/blog/image-1.jpg" alt="" />
-    </a>
-    <div class="p-5">
-        <a href="#">
-            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Noteworthy technology acquisitions 2021</h5>
-        </a>
-        <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.</p>
-        <a href="#" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-            Read more
-             <svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-            </svg>
-        </a>
+    <div className="fixed inset-0 overflow-auto flex justify-center items-start px-4 py-8 bg-gray-900">
+      <div className="w-full max-w-4xl mx-auto mt-20">
+        <div className="flex justify-between items-center mb-12">
+          <div className="flex items-center gap-4 text-white">
+            {userDetails?.photo && (
+              <img 
+                src={userDetails.photo} 
+                alt="Profile" 
+                className="w-12 h-12 rounded-full object-cover"
+              />
+            )}
+            <div>
+              <h1 className="text-2xl font-bold">
+                Welcome, {userDetails?.firstName || "User"}!
+              </h1>
+              <p className="text-gray-300">{userDetails?.email}</p>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setShowLogoutConfirm(true)}
+            className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-all"
+          >
+            Logout
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {diseases.map((disease) => (
+            <div
+              key={disease.key}
+              className="bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+              onClick={() => navigate(`/predict/${disease.key}`)}
+            >
+              <div className="aspect-video bg-gray-700">
+                <img 
+                  src={disease.image} 
+                  alt={disease.name} 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-semibold text-white mb-2">
+                  {disease.name}
+                </h3>
+                <p className="text-gray-300">
+                  Upload an image to get instant AI-powered prediction
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {showLogoutConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div className="bg-gray-800 p-6 rounded-xl max-w-sm w-full mx-4 text-white">
+              <h3 className="text-xl font-semibold mb-4">Confirm Logout</h3>
+              <p className="text-gray-300 mb-6">Are you sure you want to logout?</p>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowLogoutConfirm(false)}
+                  className="px-4 py-2 text-gray-300 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
-</div>
-
-
-
   );
 }
+
 export default Dashboard;

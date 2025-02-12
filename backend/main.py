@@ -1,11 +1,25 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import tensorflow as tf
 import numpy as np
 from PIL import Image
 import io
 
 app = FastAPI()
+
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],  # Update with your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all HTTP methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allows all headers
+)
+
+
+
 
 # Load the trained model
 loaded_model = tf.keras.models.load_model("models/brain_tumor_model.keras", compile=False)
@@ -17,7 +31,7 @@ train_class_names = ["glioma", "meningioma", "notumor", "pituitary"]
 def home():
     return {"message": "AI Disease Prediction API"}
 
-@app.post("/predict")
+@app.post("/predict/brain_tumor")
 async def predict_brain_tumor(file: UploadFile = File(...)):  
     """Predict Brain Tumor Using the Same Method as Your Provided Code"""
     try:
@@ -51,3 +65,5 @@ async def predict_brain_tumor(file: UploadFile = File(...)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+
+#python3 -m uvicorn main:app --reload
