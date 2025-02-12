@@ -42,7 +42,7 @@ function Dashboard() {
 
   const diseases = [
     { name: "Brain Tumor", key: "brain_tumor", image: "/images/brain_tumor.jpg" },
-    { name: "Diabetic Retinopathy", key: "diabetic_retinopathy", image: "/images/diabetic_retinopathy.jpg" },
+    { name: "Kidney Disease", key: "kidney_disease", image: "/images/kidney_disease.jpg" },
     { name: "Skin Cancer", key: "skin_cancer", image: "/images/skin_cancer.jpg" },
   ];
 
