@@ -1,0 +1,28 @@
+* both fronted and backend should be run in separate terminal
+
+BACKEND CMDS
+> cd backend
+
+      Create a virtual environment (one time thing)
+      > python -m venv myenv
+
+      Activate the virtual environment (always before running)
+ 
+            Windows
+            > myenv\Scripts\activate
+
+            macOS and Linux
+            > source myenv/bin/activate
+
+      install requirements (one time thing)
+      > pip install -r requirements.txt
+
+      run backend
+      > python3 -m uvicorn main:app --reload
+      
+
+FRONTED CMDS
+> cd fronted
+
+      Run fronted with npm
+      > npm run dev
