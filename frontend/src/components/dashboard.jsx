@@ -45,7 +45,7 @@ function Dashboard() {
   const diseases = [
     { name: "Brain Tumor", key: "brain_tumor", image: KidneyImg },
     { name: "Kidney Disease", key: "kidney_disease", image: BrainImg },
-    { name: "Skin Cancer", key: "skin_cancer", image: "/images/skin_cancer.jpg" },
+    //{ name: "Skin Cancer", key: "skin_cancer", image: "/images/skin_cancer.jpg" },
   ];
 
   if (loading) {
