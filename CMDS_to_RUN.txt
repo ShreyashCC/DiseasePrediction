@@ -4,7 +4,7 @@ BACKEND CMDS
 > cd backend
 
       Create a virtual environment (one time thing)
-      > python -m venv myenv
+      > python -m venv venv
 
       Activate the virtual environment (always before running)
  
@@ -12,7 +12,7 @@ BACKEND CMDS
             > myenv\Scripts\activate
 
             macOS and Linux
-            > source myenv/bin/activate
+            > source venv/bin/activate
 
       install requirements (one time thing)
       > pip install -r requirements.txt

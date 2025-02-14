@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
+import KidneyImg from "../assets/KidneyDisease.jpeg"
+import BrainImg from "../assets/BrainTumor.jpeg"
 
 function Dashboard() {
   const [userDetails, setUserDetails] = useState(null);
@@ -41,8 +43,8 @@ function Dashboard() {
   }
 
   const diseases = [
-    { name: "Brain Tumor", key: "brain_tumor", image: "/images/brain_tumor.jpg" },
-    { name: "Kidney Disease", key: "kidney_disease", image: "/images/kidney_disease.jpg" },
+    { name: "Brain Tumor", key: "brain_tumor", image: KidneyImg },
+    { name: "Kidney Disease", key: "kidney_disease", image: BrainImg },
     { name: "Skin Cancer", key: "skin_cancer", image: "/images/skin_cancer.jpg" },
   ];
 
