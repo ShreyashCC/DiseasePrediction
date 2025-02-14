@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { auth, db } from "./firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { toast } from "react-toastify";
-import KidneyImg from "../assets/KidneyDisease.jpeg"
-import BrainImg from "../assets/BrainTumor.jpeg"
+import Header from "./header"; // Import your Header component
+import kidneyDiseaseImg from "../assets/KidneyDisease.jpeg"
+import BrainTumorImg from "../assets/BrainTumor.jpeg"
 
 function Dashboard() {
   const [userDetails, setUserDetails] = useState(null);
@@ -18,7 +19,9 @@ function Dashboard() {
         if (user) {
           const docRef = doc(db, "Users", user.uid);
           const docSnap = await getDoc(docRef);
-          
+          if (docSnap.exists()) {
+            setUserDetails(docSnap.data());
+          }
         } else {
           navigate("/login");
         }
@@ -43,8 +46,8 @@ function Dashboard() {
   }
 
   const diseases = [
-    { name: "Brain Tumor", key: "brain_tumor", image: KidneyImg },
-    { name: "Kidney Disease", key: "kidney_disease", image: BrainImg },
+    { name: "Brain Tumor", key: "brain_tumor", image: BrainTumorImg },
+    { name: "Kidney Disease", key: "kidney_disease", image: kidneyDiseaseImg },
     //{ name: "Skin Cancer", key: "skin_cancer", image: "/images/skin_cancer.jpg" },
   ];
 
@@ -57,32 +60,12 @@ function Dashboard() {
   }
 
   return (
-    <div className="fixed inset-0 overflow-auto flex justify-center items-start px-4 py-8 bg-gray-900">
+    <div className="min-h-screen bg-gray-900">
+      <Header onLogout={() => setShowLogoutConfirm(true)} />
+
+      <div className="fixed inset-0 overflow-auto flex justify-center items-start px-4 py-8 bg-gray-900">
       <div className="w-full max-w-4xl mx-auto mt-20">
-        <div className="flex justify-between items-center mb-12">
-          <div className="flex items-center gap-4 text-white">
-            {userDetails?.photo && (
-              <img 
-                src={userDetails.photo} 
-                alt="Profile" 
-                className="w-12 h-12 rounded-full object-cover"
-              />
-            )}
-            <div>
-              <h1 className="text-2xl font-bold">
-                Welcome, {userDetails?.firstName || "User"}!
-              </h1>
-              <p className="text-gray-300">{userDetails?.email}</p>
-            </div>
-          </div>
-          
-          <button
-            onClick={() => setShowLogoutConfirm(true)}
-            className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 transition-all"
-          >
-            Logout
-          </button>
-        </div>
+        
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {diseases.map((disease) => (
@@ -133,6 +116,7 @@ function Dashboard() {
           </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
